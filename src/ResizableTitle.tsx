@@ -1,6 +1,11 @@
 import { Resizable } from 'react-resizable';
 
-export default function ResizableTitle (props) {
+type propsType = {
+  width: number;
+  onResize: () => void;
+}
+
+export default function ResizableTitle (props: propsType) {
   const { onResize, width, ...restProps } = props;
 
   if (!width) {

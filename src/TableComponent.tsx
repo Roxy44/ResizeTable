@@ -10,26 +10,31 @@ export default function TableComponent() {
             title: 'Transfer date',
             dataIndex: 'date',
             width: 200,
+            key: 0,
         },
         {
             title: 'Amount',
             dataIndex: 'amount',
             width: 100,
+            key: 1,
             children: [
                 {
                     title: 'Age < 5',
                     dataIndex: 'age',
                     width: 100,
+                    key: 2,
                     children : [
                         {
                             title: 'Male',
                             dataIndex: 'ageLessFiveMale',
                             width: 100,
+                            key: 3,
                         },
                         {
                             title: 'Female',
                             dataIndex: 'ageLessFiveFemale',
                             width: 100,
+                            key: 4,
                         },
                     ]
                 },
@@ -37,16 +42,19 @@ export default function TableComponent() {
                     title: 'Age > 5',
                     dataIndex: 'age',
                     width: 100,
+                    key: 5,
                     children : [
                         {
                             title: 'Male',
                             dataIndex: 'ageMoreFiveMale',
                             width: 100,
+                            key: 6,
                         },
                         {
                             title: 'Female',
                             dataIndex: 'ageMoreFiveFemale',
                             width: 100,
+                            key: 7,
                         },
                     ]
                 },
@@ -54,23 +62,27 @@ export default function TableComponent() {
         }, 
         {
             title: 'Health status',
-            key: 'health',
+            dataIndex: 'health',
             width: 100,
+            key: 8,
             children : [
                 {
                     title: 'Healthy',
                     dataIndex: 'healthy',
                     width: 100,
+                    key: 9,
                 },
                 {
                     title: 'Rehabilitation',
                     dataIndex: 'rehabilitation',
                     width: 100,
+                    key: 10,
                 },
                 {
                     title: 'ill',
                     dataIndex: 'ill',
                     width: 100,
+                    key: 11,
                 },
             ]
         },
@@ -78,11 +90,13 @@ export default function TableComponent() {
             title: 'Breeds',
             dataIndex: 'types',
             width: 100,
+            key: 12,
         },
         {
             title: 'Note',
             dataIndex: 'note',
             width: 100,
+            key: 13,
         },
     ]);
 	
@@ -134,24 +148,71 @@ export default function TableComponent() {
         },
     ];
 
-    const handleResize = (index) => (e, {size }) => {
-		const nextColumns = [...columns];
-		nextColumns[index] = {
-			...nextColumns[index],
-			width: size.width,
-		};
+    const getNewColumns = (columns: any[], searchKey: number, newWidth: number, isFindChild = false) => columns.map((col: any) => {
+        if (isFindChild || col.key === searchKey) {
+            if (col.children && col.key === searchKey) {
+                const children: any = getNewColumns(col.children, searchKey, newWidth, true);
+                return {
+                    ...col,
+                    children,
+                    width: newWidth,
+                };
+            } else if (isFindChild && col.children) {
+                const children: any = getNewColumns(col.children, searchKey, newWidth, true);
+                return {
+                    ...col,
+                    children,
+                    width: (newWidth - col.width) / columns.length,
+                };
+            } else if (isFindChild && !col.children) {
+                return {
+                    ...col,
+                    width: (newWidth - col.width) / columns.length,
+                };
+            } else {
+                return {
+                    ...col,
+                    width: newWidth,
+                };
+            }
+        } 
+        if (col.children) {
+            const children: any = getNewColumns(col.children, searchKey, newWidth);
+            return {
+                ...col,
+                children,
+            }; 
+        } else {
+            return col; 
+        }
+    })
 
-		setColumns(nextColumns);	
-    };
+    const handleResize = (key: number) => (e: React.SyntheticEvent<EventTarget>, payload: {size: {width: number}}) => {
+        e.preventDefault();
+        setColumns(getNewColumns(columns, key, payload.size.width));
+    }
     
-    const Columns = columns.map((col, index) => ({
-		...col,
-		onHeaderCell: column => ({
-			width: column.width,
-			onResize: handleResize(index),
-		}),
-    }));
-
-    return <Table bordered components={components} columns={Columns} dataSource={data} />;
+    const getColumns = (columns: any[]) => columns.map((col: any) => {
+        if (col.children) {
+            const children: any = getColumns(col.children);
+            return {
+                ...col,
+                onHeaderCell: (col: any) => ({
+                    width: col.width,
+                    onResize: handleResize(col.key),
+                }),
+                children,
+            };
+        } else {
+            return {
+                ...col,
+                onHeaderCell: (col: any) => ({
+                    width: col.width,
+                    onResize: handleResize(col.key),
+                })
+            };
+        }
+    })
+    
+    return <Table bordered components={components} columns={getColumns(columns)} dataSource={data} />;
 }
-
