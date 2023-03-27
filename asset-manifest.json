@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/ResizeTable/static/css/main.606ae937.css",
+    "main.js": "/ResizeTable/static/js/main.253e9f8a.js",
+    "index.html": "/ResizeTable/index.html",
+    "main.606ae937.css.map": "/ResizeTable/static/css/main.606ae937.css.map",
+    "main.253e9f8a.js.map": "/ResizeTable/static/js/main.253e9f8a.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.606ae937.css",
+    "static/js/main.253e9f8a.js"
+  ]
+}
